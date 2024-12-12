@@ -122,6 +122,7 @@ class OdomPathSub(Node):
         self.real_path.poses.append(real_pose)        
         self.real_path_pub.publish(self.real_path)
 
+
 def main(args=None):
     rclpy.init(args=args)
 
