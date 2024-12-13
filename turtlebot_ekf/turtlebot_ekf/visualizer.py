@@ -100,6 +100,52 @@ class CorrectedPathSub(Node):
         self.corrected_path_pub.publish(self.corrected_path)
 
 
+class FusedPathSub(Node):
+    def __init__(self):
+        super().__init__("Fused_Path_Subscriber")
+        self.cb_group     = ReentrantCallbackGroup()
+
+        self.fused_path_sub = self.create_subscription(Float32MultiArray, "/ekf/fused_state", self.callback, 10, callback_group=self.cb_group)
+        self.fused_path_pub = self.create_publisher(Path, "/ekf/fused_path", 10)
+
+        self.fused_path = Path()
+        self.fused_path.header.frame_id = "odom"
+
+        self.br_ = TransformBroadcaster(self)
+        self.transfrom_stamped = TransformStamped()
+        self.transfrom_stamped.header.frame_id = "odom"
+        self.transfrom_stamped.child_frame_id = "ekf_fused"
+
+
+    def callback(self, msg) :
+
+        x_t = msg.data
+
+        corr_q = quaternion_from_euler(0, 0, x_t[2])
+
+        self.transfrom_stamped.header.stamp  = self.get_clock().now().to_msg()
+        self.transfrom_stamped.transform.translation.x = x_t[0]
+        self.transfrom_stamped.transform.translation.y = x_t[1]
+        self.transfrom_stamped.transform.rotation.x    = corr_q[0]
+        self.transfrom_stamped.transform.rotation.y    = corr_q[1]
+        self.transfrom_stamped.transform.rotation.z    = corr_q[2]
+        self.transfrom_stamped.transform.rotation.w    = corr_q[3]
+        self.br_.sendTransform(self.transfrom_stamped)
+
+        fused_pose = PoseStamped()
+        fused_pose.header.stamp = self.get_clock().now().to_msg()
+        fused_pose.pose.position.x = x_t[0]
+        fused_pose.pose.position.y = x_t[1]
+        fused_pose.pose.orientation.x = corr_q[0]
+        fused_pose.pose.orientation.y = corr_q[1]
+        fused_pose.pose.orientation.z = corr_q[2]
+        fused_pose.pose.orientation.w = corr_q[3]
+
+        self.fused_path.header.stamp = self.get_clock().now().to_msg()
+        self.fused_path.poses.append(fused_pose)
+        self.fused_path_pub.publish(self.fused_path)
+
+
 class OdomPathSub(Node):
     def __init__(self):
         super().__init__("Odom_Path_Subscriber")
@@ -128,11 +174,13 @@ def main(args=None):
 
     predicted_path_sub = PredictedPathSub()
     corrected_path_sub = CorrectedPathSub()
+    fused_path_sub     = FusedPathSub()
     real_path_sub      = OdomPathSub()
 
     executor  = MultiThreadedExecutor()
     executor.add_node(predicted_path_sub)
     executor.add_node(corrected_path_sub)
+    executor.add_node(fused_path_sub)
     executor.add_node(real_path_sub)
 
     executor.spin()
