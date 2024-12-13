@@ -21,7 +21,9 @@ setup(
     entry_points={
         'console_scripts': [
             'ekf_node = turtlebot_ekf.ekf:main',
-            'visualizer_node = turtlebot_ekf.visualizer:main'
+            'visualizer_node = turtlebot_ekf.visualizer:main',
+            'gps_measurment_publisher = turtlebot_ekf.GPS_measurment_publisher:main',
+            'encoder_measurment_publisher = turtlebot_ekf.encoder_measurment_publisher:main'
         ],
     },
 )
