@@ -41,7 +41,7 @@ class ExtendedKalmanFilterUtils():
 
         x_t_1 , y_t_1, theta_t_1= x[0], x[1], x[2]
         v_t , w_t = u[0], u[1]
-        F = np.eye(3)  
+        F = np.zeros((3,3))  
         
         if abs(w_t) > 1e-6:
             F[0, 2] = (v_t / w_t) * (np.cos(theta_t_1 + w_t * dt) - np.cos(theta_t_1))
@@ -59,12 +59,12 @@ class ExtendedKalmanFilterUtils():
         Compute the process noise covriance using the control input
         """
 
-        v_noise_std = 0.05  
-        w_noise_std = 0.05
+        v_noise_std = 0.01  
+        w_noise_std = 0.01
 
-        sigma_x2     = (v_noise_std * dt) ** 2
-        sigma_y2     = (v_noise_std * dt) ** 2 * 0.1 # much smaller than the noise in the x axis
-        sigma_theta2 = (w_noise_std * dt) ** 2
+        sigma_x2     = (v_noise_std) ** 2
+        sigma_y2     = (v_noise_std) ** 2 * 0.1 # much smaller than the noise in the x axis
+        sigma_theta2 = (w_noise_std) ** 2
 
         R = np.diag([sigma_x2, sigma_y2, sigma_theta2]) 
 
@@ -107,9 +107,9 @@ class ExtendedKalmanFilterUtils():
         C      : Measurement model matrix of Encoders
         """
 
-        x_std     = 0.0002
-        y_std     = 0.0002
-        theta_std = 0.0002
+        x_std     = 0.003
+        y_std     = 0.003
+        theta_std = 0.002
 
         sigma_x     = x_std ** 2
         sigma_y     = y_std ** 2
@@ -131,8 +131,8 @@ class ExtendedKalmanFilterUtils():
         C      : Measurement model matrix of GPS
         """
 
-        x_std = 0.0001
-        y_std = 0.0001
+        x_std = 0.001
+        y_std = 0.001
 
         sigma_x = x_std ** 2
         sigma_y = y_std ** 2
