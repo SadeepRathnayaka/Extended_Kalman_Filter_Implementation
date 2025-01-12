@@ -26,8 +26,8 @@ class EncoderReadingPublisher(Node):
 
     def joint_callback(self, msg):
 
-        wheel_encoder_left  = msg.position[1]
-        wheel_encoder_right = msg.position[0]
+        wheel_encoder_left  = msg.position[1]  # left motor angle
+        wheel_encoder_right = msg.position[0]  # right motor angle
 
         delta_left  = wheel_encoder_left  - self.left_motor_pos_init
         delta_right = wheel_encoder_right - self.right_motor_pos_init
